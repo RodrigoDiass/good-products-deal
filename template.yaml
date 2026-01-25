@@ -1,6 +1,36 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
+Parameters:
+  BucketName:
+    Type: String
+    Default: rodrigo-products-data
+  RawPrefix:
+    Type: String
+    Default: rodrigo-products-data-raw
+  StructuredPrefix:
+    Type: String
+    Default: rodrigo-products-data-structured
+  AnalyzedPrefix:
+    Type: String
+    Default: rodrigo-products-data-analyzed
+  AwsRegionName:
+    Type: String
+    Default: us-east-1
+  AlertEmail:
+    Type: String
+    Default: rodrigobdiass@gmail.com
+
+Globals:
+  Function:
+    Environment:
+      Variables:
+        BUCKET_NAME: !Ref BucketName
+        RAW_PREFIX: !Ref RawPrefix
+        STRUCTURED_PREFIX: !Ref StructuredPrefix
+        ANALYZED_PREFIX: !Ref AnalyzedPrefix
+        AWS_REGION_NAME: !Ref AwsRegionName
+
 Resources:
   ExtractorFunction:
     Type: AWS::Serverless::Function
@@ -71,4 +101,4 @@ Resources:
       TopicName: product-failures-alert
       Subscription:
         - Protocol: email
-          Endpoint: rodrigobdiass@gmail.com
+          Endpoint: !Ref AlertEmail

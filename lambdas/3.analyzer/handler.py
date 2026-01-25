@@ -1,11 +1,16 @@
 import boto3
 import json
+import os
 import logging
 from datetime import datetime
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-bedrock = boto3.client('bedrock-runtime', region_name='us-east-1')
+
+AWS_REGION_NAME = os.environ.get('AWS_REGION_NAME', 'us-east-1')
+ANALYZED_PREFIX = os.environ.get('ANALYZED_PREFIX', 'rodrigo-products-data-analyzed')
+
+bedrock = boto3.client('bedrock-runtime', region_name=AWS_REGION_NAME)
 s3 = boto3.client('s3')
 
 def analyze_product(product: dict) -> dict:
@@ -79,7 +84,7 @@ def handler(event, context):
             output.append({**product, "error": "analysis_failed"})
     s3.put_object( 
         Bucket=bucket,
-        Key=f'rodrigo-products-data-analyzed/analyzed/product-{datetime.now().strftime("%Y-%m-%dT%H%M%S")}.json',
+        Key=f'{ANALYZED_PREFIX}/analyzed/product-{datetime.now().strftime("%Y-%m-%dT%H%M%S")}.json',
         Body=json.dumps({"products": output})
         )
     
