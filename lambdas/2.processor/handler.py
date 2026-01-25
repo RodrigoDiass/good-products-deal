@@ -1,11 +1,14 @@
 from pydantic import BaseModel, Field, ValidationError
 import boto3
 import json
+import os
 from datetime import datetime
 import logging
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+STRUCTURED_PREFIX = os.environ.get('STRUCTURED_PREFIX', 'structured')
 
 
 class Product(BaseModel): #Data Contract
@@ -34,8 +37,8 @@ def handler(event, context):
             bucket = event.get('bucket')
             key = event.get('key')
             filename = key.split('/')[-1]
-            key_validate=f"rodrigo-products-data-structured/processed/{filename}"
-            key_failed=f"rodrigo-products-data-structured/failed/{filename}"
+            key_validate = f"{STRUCTURED_PREFIX}/processed/{filename}"
+            key_failed = f"{STRUCTURED_PREFIX}/failed/{filename}"
             response = s3.get_object(Bucket=bucket, Key=key)
             raw_data = json.loads(response['Body'].read())
         except Exception as e:

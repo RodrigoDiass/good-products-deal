@@ -1,16 +1,20 @@
 import requests
 import boto3
 import json
+import os
 from datetime import datetime
 import logging
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+BUCKET_NAME = os.environ['BUCKET_NAME']
+RAW_PREFIX = os.environ.get('RAW_PREFIX', 'raw')
+
 def handler(event, context):
     current_time = datetime.now().strftime('%Y-%m-%dT%H%M%S')
-    bucket= "rodrigo-products-data"
-    key= f"rodrigo-products-data-raw/products-{current_time}.json"
+    bucket = BUCKET_NAME
+    key = f"{RAW_PREFIX}/products-{current_time}.json"
     
     try:
         url = "https://dummyjson.com/products"
