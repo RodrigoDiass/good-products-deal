@@ -69,3 +69,6 @@ Resources:
     Type: AWS::SNS::Topic
     Properties:
       TopicName: product-failures-alert
+      Subscription:
+        - Protocol: email
+          Endpoint: rodrigobdiass@gmail.com
