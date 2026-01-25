@@ -6,6 +6,7 @@ resolve_s3 = true
 s3_prefix = "good-products-deal"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
+parameter_overrides = "RawPrefix=\"raw\" StructuredPrefix=\"structured\" AnalyzedPrefix=\"analyzed\" AwsRegionName=\"us-east-1\" AlertEmail=\"rodrigobdiass@gmail.com\""
 image_repositories = []
 
 [default.global.parameters]

@@ -2,18 +2,15 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
 Parameters:
-  BucketName:
-    Type: String
-    Default: rodrigo-products-data
   RawPrefix:
     Type: String
-    Default: rodrigo-products-data-raw
+    Default: raw
   StructuredPrefix:
     Type: String
-    Default: rodrigo-products-data-structured
+    Default: structured
   AnalyzedPrefix:
     Type: String
-    Default: rodrigo-products-data-analyzed
+    Default: analyzed
   AwsRegionName:
     Type: String
     Default: us-east-1
@@ -25,13 +22,27 @@ Globals:
   Function:
     Environment:
       Variables:
-        BUCKET_NAME: !Ref BucketName
+        BUCKET_NAME: !Ref ProductsBucket
         RAW_PREFIX: !Ref RawPrefix
         STRUCTURED_PREFIX: !Ref StructuredPrefix
         ANALYZED_PREFIX: !Ref AnalyzedPrefix
         AWS_REGION_NAME: !Ref AwsRegionName
 
 Resources:
+  # S3 Bucket for storing products data
+  ProductsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
   ExtractorFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -43,8 +54,8 @@ Resources:
         - Statement:
             - Effect: Allow
               Action:
-                - s3:*
-              Resource: '*'
+                - s3:PutObject
+              Resource: !Sub '${ProductsBucket.Arn}/*'
 
   ProcessorFunction:
     Type: AWS::Serverless::Function
@@ -57,8 +68,9 @@ Resources:
         - Statement:
             - Effect: Allow
               Action:
-                - s3:*
-              Resource: '*'
+                - s3:GetObject
+                - s3:PutObject
+              Resource: !Sub '${ProductsBucket.Arn}/*'
 
   AnalyzerFunction:
     Type: AWS::Serverless::Function
@@ -71,8 +83,12 @@ Resources:
         - Statement:
             - Effect: Allow
               Action:
-                - s3:*
-                - bedrock:*
+                - s3:GetObject
+                - s3:PutObject
+              Resource: !Sub '${ProductsBucket.Arn}/*'
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
               Resource: '*'
 
   ProductsStateMachine:
@@ -102,3 +118,14 @@ Resources:
       Subscription:
         - Protocol: email
           Endpoint: !Ref AlertEmail
+
+Outputs:
+  ProductsBucketName:
+    Description: S3 bucket for products data
+    Value: !Ref ProductsBucket
+  StateMachineArn:
+    Description: ARN of the Step Functions state machine
+    Value: !Ref ProductsStateMachine
+  FailuresTopicArn:
+    Description: ARN of the SNS topic for failure alerts
+    Value: !Ref FailuresTopic

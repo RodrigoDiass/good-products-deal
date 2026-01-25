@@ -8,8 +8,8 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-BUCKET_NAME = os.environ.get('BUCKET_NAME', 'rodrigo-products-data')
-RAW_PREFIX = os.environ.get('RAW_PREFIX', 'rodrigo-products-data-raw')
+BUCKET_NAME = os.environ['BUCKET_NAME']
+RAW_PREFIX = os.environ.get('RAW_PREFIX', 'raw')
 
 def handler(event, context):
     current_time = datetime.now().strftime('%Y-%m-%dT%H%M%S')

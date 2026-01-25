@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-STRUCTURED_PREFIX = os.environ.get('STRUCTURED_PREFIX', 'rodrigo-products-data-structured')
+STRUCTURED_PREFIX = os.environ.get('STRUCTURED_PREFIX', 'structured')
 
 
 class Product(BaseModel): #Data Contract

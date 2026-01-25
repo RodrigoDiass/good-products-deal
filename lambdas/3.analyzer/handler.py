@@ -8,7 +8,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 AWS_REGION_NAME = os.environ.get('AWS_REGION_NAME', 'us-east-1')
-ANALYZED_PREFIX = os.environ.get('ANALYZED_PREFIX', 'rodrigo-products-data-analyzed')
+ANALYZED_PREFIX = os.environ.get('ANALYZED_PREFIX', 'analyzed')
 
 bedrock = boto3.client('bedrock-runtime', region_name=AWS_REGION_NAME)
 s3 = boto3.client('s3')
