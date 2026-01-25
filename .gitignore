@@ -1,0 +1,20 @@
+# --- AWS SAM ---
+.aws-sam/
+
+# --- Python / Virtual Env ---
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# --- Env Variables ---
+.env
+samconfig.toml.backup
+
+# --- OS  ---
+.DS_Store
+Thumbs.db
+
+# --- Logs ---
+*.log

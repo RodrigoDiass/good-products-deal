@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  ExtractorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.handler
+      Runtime: python3.12
+      CodeUri: lambdas/1.extractor/
+      Timeout: 30
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - s3:*
+              Resource: '*'
+
+  ProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.handler
+      Runtime: python3.12
+      CodeUri: lambdas/2.processor/
+      Timeout: 60
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - s3:*
+              Resource: '*'
+
+  AnalyzerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.handler
+      Runtime: python3.12
+      CodeUri: lambdas/3.analyzer/
+      Timeout: 180
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - s3:*
+                - bedrock:*
+              Resource: '*'
+
+  ProductsStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: products-analyzer
+      DefinitionUri: statemachine/definition.json
+      DefinitionSubstitutions:
+        ExtractorFunctionArn: !GetAtt ExtractorFunction.Arn
+        ProcessorFunctionArn: !GetAtt ProcessorFunction.Arn
+        AnalyzerFunctionArn: !GetAtt AnalyzerFunction.Arn
+        FailuresTopicArn: !Ref FailuresTopic
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref ExtractorFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref ProcessorFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref AnalyzerFunction
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt FailuresTopic.TopicName
+
+  FailuresTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: product-failures-alert

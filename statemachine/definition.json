@@ -1,0 +1,78 @@
+{
+  "StartAt": "Extract",
+  "States": {
+    "Extract": {
+      "Type": "Task",
+      "Resource":  "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.Payload",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "${ExtractorFunctionArn}"
+      },
+      "Next": "Process"
+    },
+    "Process": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.Payload",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "${ProcessorFunctionArn}"
+      },
+      "Next": "RouterFailures"
+    },
+    "RouterFailures": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.failure_rate", 
+          "NumericGreaterThanEquals": 60,
+          "Next": "NotifyCriticalFailures"
+        },
+        {
+          "Variable": "$.failed_count", 
+          "NumericGreaterThan": 0,
+          "Next": "NotifyFailures"
+        }
+      ],
+      "Default": "Analyzer"
+    },
+    "NotifyFailures": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Parameters": {
+        "TopicArn": "${FailuresTopicArn}",
+        "Message.$": "States.Format('Circuit breaker: validation failures detected on {} products', $.failed_count)"
+      },
+      "ResultPath": "$.notification_result",
+      "Next": "Analyzer"
+    },
+    "NotifyCriticalFailures": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::sns:publish",
+      "Parameters": {
+        "TopicArn": "${FailuresTopicArn}",
+        "Message": "Circuit breaker: more than 60% validation failures, tripping circuit breaker"
+      },
+      "Next": "FailState"
+    },
+    "FailState": {
+      "Type": "Fail",
+      "Error": "CircuitBreakerTripped",
+      "Cause": "Too many validation failures"
+    },
+    "Analyzer": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.Payload",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "${AnalyzerFunctionArn}"
+      },
+      "Next": "Success"
+    },
+    "Success": {
+      "Type": "Succeed"
+    }
+  }
+}
