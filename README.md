@@ -1,5 +1,13 @@
 # Good Products Deal
 
+> **Serverless ETL pipeline** demonstrating AWS best practices: Step Functions orchestration, circuit breaker pattern, AI-powered analysis with Bedrock, and infrastructure as code with SAM.
+> 
+> Built to showcase production-ready serverless architecture and AWS services integration.
+
+[![Python](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/)
+[![AWS SAM](https://img.shields.io/badge/AWS-SAM-orange.svg)](https://aws.amazon.com/serverless/sam/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Serverless pipeline for product extraction, validation, and analysis using AWS Step Functions, Lambda, and Amazon Bedrock.
 
 ## Architecture
