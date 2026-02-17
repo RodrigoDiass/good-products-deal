@@ -12,22 +12,7 @@ Serverless pipeline for product extraction, validation, and analysis using AWS S
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                            AWS Step Functions                                │
-│                                                                              │
-│  ┌──────────┐    ┌──────────┐    ┌────────────────┐    ┌──────────┐        │
-│  │ Extract  │───▶│ Process  │───▶│ RouterFailures │───▶│ Analyzer │        │
-│  └──────────┘    └──────────┘    └────────────────┘    └──────────┘        │
-│       │               │                  │                   │              │
-│       ▼               ▼                  ▼                   ▼              │
-│   Lambda 1        Lambda 2          SNS Topic            Lambda 3          │
-│  (Extractor)    (Processor)     (Notifications)        (Analyzer)          │
-│       │               │                                      │              │
-│       ▼               ▼                                      ▼              │
-│      S3              S3                                     S3             │
-│   (raw data)    (validated)                            (analyzed)          │
-└─────────────────────────────────────────────────────────────────────────────┘
+![Architecture Diagram](./assets/architecture-diagram.jpg)──────────────────────────────────────────────────────────────────┘
 ```
 
 ## Components
